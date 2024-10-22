@@ -64,7 +64,10 @@ namespace Shooting
             {
                 if (currentBullet.bulletData.isReady)
                 {
-                    Instantiate(currentBullet.bulletData.prefab, spawnSpot.position, spawnSpot.rotation);
+                    ShootableObject Obj = Instantiate(currentBullet.bulletData.prefab, spawnSpot.position, spawnSpot.rotation);
+                    Obj.PrepareShootableObject();
+                    Obj.StartMovement(Vector3.forward);
+                    
                     GamePersistent.GetActiveWorld().GetSubsystem<TimerSubsystem>().ResumeTimer(currentBullet.timerId);
                     currentBullet.bulletData.isReady = false;
                 }

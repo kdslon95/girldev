@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace Shooting.Shootable
 {
+    [RequireComponent(typeof(Rigidbody))]
     public abstract class ShootableObject : MonoBehaviour
     {
         public enum ShootingFrequency
@@ -22,6 +23,21 @@ namespace Shooting.Shootable
         private float damage;
         public float Damage => damage;
 
+        [SerializeField, Min(0f)] 
+        private float speed;
+        
         //Modifiers
+
+        private Rigidbody rb;
+        public virtual void PrepareShootableObject()
+        {
+            rb = GetComponent<Rigidbody>();
+            rb.useGravity = false;
+        }
+
+        public virtual void StartMovement(Vector3 direction)
+        {
+            rb.AddForce(direction * speed, ForceMode.Impulse);
+        }
     }
 }
