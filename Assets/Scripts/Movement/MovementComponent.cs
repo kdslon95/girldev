@@ -1,3 +1,5 @@
+using Core;
+using Subsystems.Persistent;
 using UnityEngine;
 
 namespace Movement
@@ -31,27 +33,31 @@ namespace Movement
         #endif
         
         private MovementDirection movementDirection = MovementDirection.Idle;
-        
+        private InputSubsystem inputSubsystem;
+
+        private void Start()
+        {
+            inputSubsystem = GamePersistent.GetActiveWorld().GetSubsystem<InputSubsystem>();
+        }
+
         void Update()
         {
-            float horizontalInput = Input.GetAxis("Horizontal");
             movementDirection = MovementDirection.Idle;
-
             if (!disableTilting)
             {
                 transform.rotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y,
-                    movementRollAngle * -horizontalInput);
+                    movementRollAngle * -inputSubsystem.InputContext.movementValue);
             }
 
-            if (horizontalInput == 0) 
+            if (inputSubsystem.InputContext.movementValue == 0) 
                 return;
         
             #if UNITY_EDITOR
             debugLineColor = Color.green;
             #endif
             
-            movementDirection = (MovementDirection) Mathf.Sign(horizontalInput);
-            if (Physics.Raycast(transform.position, Vector3.right * horizontalInput, blockDetectionDistance, LayerMask.GetMask("Blocker")))
+            movementDirection = (MovementDirection) Mathf.Sign(inputSubsystem.InputContext.movementValue);
+            if (Physics.Raycast(transform.position, Vector3.right * inputSubsystem.InputContext.movementValue, blockDetectionDistance, LayerMask.GetMask("Blocker")))
             {
                 #if UNITY_EDITOR
                 debugLineColor = Color.red;
@@ -59,7 +65,7 @@ namespace Movement
                 return;
             }
                 
-            transform.position += Vector3.right * (horizontalInput * movementSpeed * Time.deltaTime);
+            transform.position += Vector3.right * (inputSubsystem.InputContext.movementValue * movementSpeed * Time.deltaTime);
         }
 
         #if UNITY_EDITOR

@@ -1,91 +1,73 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Core;
 using Shooting.Shootable;
+using Subsystems.Persistent;
 using Subsystems.World;
 using UnityEngine;
 
 namespace Shooting
 {
-    public class BulletData
-    {
-        public ShootableTag bulletTag;
-        public bool isReady;
-
-        public BulletData(ShootableTag bulletTag, bool isReady)
-        {
-            this.bulletTag = bulletTag;
-            this.isReady = isReady;
-        }
-    }
-
     public class ShootingComponent : MonoBehaviour
     {
-        [SerializeField]
-        private List<ShootableTag> availableBullets;
-        private Dictionary<Guid, BulletData> bulletsTimerDictionary = new Dictionary<Guid, BulletData>();
+        private (Guid timerId, ShootableType type) lightBullet;
+        private (Guid timerId, ShootableType type) heavyBullet;
+        private (Guid timerId, ShootableType type)[] bullets;
         
+        private int currentBullet;
         private Transform spawnSpot;
-        private (Guid timerId, BulletData bulletData) currentBullet;
         
         private BulletFactorySubsystem bulletFactorySubsystem;
+        private InputSubsystem inputSubsystem;
+        private TimerSubsystem timerSubsystem;
         
         private void Start()
         {
             bulletFactorySubsystem = GamePersistent.GetActiveWorld().GetSubsystem<BulletFactorySubsystem>();
+            inputSubsystem = GamePersistent.GetActiveWorld().GetSubsystem<InputSubsystem>();
+            timerSubsystem = GamePersistent.GetActiveWorld().GetSubsystem<TimerSubsystem>();
             
-            List<ShootableTag> distinctTags = availableBullets.Distinct().ToList();
-            if (distinctTags.Count != availableBullets.Count)
-            {
-                Debug.LogError("Bullet tag must be unique. Duplicated tags has been removed from available bullets list.", this);
-                availableBullets = distinctTags;
-            }
+            #region BULLETS_INITIALIZATION
+            float lightBulletCooldown = bulletFactorySubsystem.GetCooldown(ShootableType.Light);
+            Guid lightTimerId = timerSubsystem.SetTimer(lightBulletCooldown, null, 
+                true, true, true);
+            
+            lightBullet = (lightTimerId, ShootableType.Light);
+           
+            float heavyBulletCooldown = bulletFactorySubsystem.GetCooldown(ShootableType.Heavy);
+            Guid heavyTimerId = timerSubsystem.SetTimer(heavyBulletCooldown, null, 
+                true, true, true);
+            
+            heavyBullet = (heavyTimerId, ShootableType.Heavy);
 
-            for (int i = 0; i < availableBullets.Count; ++i)
-            {
-                int idx = i;
-                TimerSubsystem timerSubsystem = GamePersistent.GetActiveWorld().GetSubsystem<TimerSubsystem>();
-                Guid timerId = timerSubsystem.SetTimer(bulletFactorySubsystem.CheckCooldown(availableBullets[i]), ()=>OnCooldownPassed(idx), 
-                    true, true, true);
-                bulletsTimerDictionary.Add(timerId, new BulletData(availableBullets[i], true));
-            }
-            
+            bullets = new[] { lightBullet, heavyBullet };
+            currentBullet = 0;
+
+            #endregion
+
             Transform[] children = gameObject.GetComponentsInChildren<Transform>();
             foreach (Transform child in children)
             {
                 if (child.gameObject.CompareTag("SpawnSpot"))
                 {
                     spawnSpot = child;
-                    KeyValuePair<Guid, BulletData> firstBullet = bulletsTimerDictionary.First();
-                    currentBullet = (firstBullet.Key, firstBullet.Value);
                     return;
                 }
             }
-            
+
             Debug.LogError($"Spawn Spot not found in children of {this.gameObject.name}", this.gameObject);
         }
         
         void Update()
         {
-            bool shootingButtonUsed = Input.GetButtonDown("Fire"); //currentBullet.bulletData.prefab.ShootingFreq == ShootableObject.ShootingFrequency.Single ?
-                //Input.GetButtonDown("Fire") : Input.GetButton("Fire");
+            bool shootingButtonUsed = bullets[currentBullet].type == ShootableType.Heavy
+                ? inputSubsystem.InputContext.isFireDown
+                : inputSubsystem.InputContext.isFireHeld;
             
-            if (shootingButtonUsed)
+            if (shootingButtonUsed && timerSubsystem.IsTimerPaused(bullets[currentBullet].timerId))
             {
-                if (currentBullet.bulletData.isReady)
-                {
-                    bulletFactorySubsystem.SpawnBullet(ShootableTag.Heavy, spawnSpot.position, spawnSpot.rotation);
-                    GamePersistent.GetActiveWorld().GetSubsystem<TimerSubsystem>().ResumeTimer(currentBullet.timerId);
-                    currentBullet.bulletData.isReady = false;
-                }
+                bulletFactorySubsystem.SpawnBullet(bullets[currentBullet].type, spawnSpot.position, spawnSpot.rotation);
+                GamePersistent.GetActiveWorld().GetSubsystem<TimerSubsystem>().ResumeTimer(bullets[currentBullet].timerId);
             }
-        }
-
-        private void OnCooldownPassed(int id)
-        {
-            bulletsTimerDictionary.Values.ToArray()[id].isReady = true;
-            Debug.Log("READY FOR SHOOT");
         }
     }
 }

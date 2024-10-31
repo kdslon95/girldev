@@ -1,24 +1,20 @@
 using UnityEngine;
-using Utils;
+using Utils.ObjectPooling;
 
 namespace Shooting.Shootable
 {
+    public enum ShootableType
+    {
+        Light,
+        Heavy,
+    }
+    
     [RequireComponent(typeof(Rigidbody))]
     public abstract class ShootableObject : MonoBehaviour, IPoolableObject
     {
-        public enum ShootingFrequency
-        {
-            Single,
-            Multiple
-        }
-
-        [SerializeField] 
-        private ShootableTag shootableTag;
-        public ShootableTag ShootableTag => shootableTag;
-        
         [SerializeField]
-        private ShootingFrequency shootingFreq;
-        public ShootingFrequency ShootingFreq => shootingFreq;
+        private ShootableType shootableType;
+        public ShootableType ShootType => shootableType;
         
         [SerializeField, Min(0f)]
         private float cooldown;
@@ -30,11 +26,12 @@ namespace Shooting.Shootable
 
         [SerializeField, Min(0f)] 
         private float speed;
+        public float Speed => speed;
         
-        //Modifiers
+        //TODO: Modifiers
 
         private Rigidbody rb;
-        public virtual void PrepareShootableObject()
+        protected virtual void PrepareShootableObject()
         {
             rb = GetComponent<Rigidbody>();
             rb.useGravity = false;
@@ -45,7 +42,7 @@ namespace Shooting.Shootable
             rb.AddForce(direction * speed, ForceMode.Impulse);
         }
 
-        public virtual void PrepareForSpawn()
+        public void PrepareForSpawn(Vector3 position, Quaternion rotation)
         {
             if(rb == null)
                 PrepareShootableObject();
@@ -55,8 +52,7 @@ namespace Shooting.Shootable
 
         public virtual void PrepareForDespawn()
         {
-            if(rb != null)
-                rb.velocity = Vector3.zero;
+            rb.velocity = Vector3.zero;
         }
     }
 }

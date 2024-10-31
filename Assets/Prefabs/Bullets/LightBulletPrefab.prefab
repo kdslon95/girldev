@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7402869144176431192}
   - component: {fileID: 1278190871940476662}
   m_Layer: 0
-  m_Name: HeavyBulletPrefab
+  m_Name: LightBulletPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8355c5dee0517754e84066836fb11d35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shootableType: 1
+  shootableType: 0
   cooldown: 0.1
   damage: 1
   speed: 10

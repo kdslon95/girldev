@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Core;
 using UnityEngine;
 
-namespace Utils
+namespace Utils.ObjectPooling
 {
     public class MonoPool<T>
         where T : MonoBehaviour, IPoolableObject
@@ -12,7 +12,7 @@ namespace Utils
         private int size;
         private Stack<T> poolStack;
 
-        public T OriginalPrefab => originalPrefab;
+        public T TemplatePrefab => originalPrefab;
 
         public MonoPool(T originalPrefab, int size)
         {
@@ -21,30 +21,33 @@ namespace Utils
             this.size = size;
 
             World world = GamePersistent.GetActiveWorld();
-            poolParent = world.SpawnLabelObject(originalPrefab.GetType().Name + "Pool");
+            poolParent = world.SpawnFolderObject(originalPrefab.gameObject.name + "Pool");
             for (int i = 0; i < size; i++)
             {
                 T spawnedObject = world.SpawnObject(originalPrefab);
-                ReturnToPool(spawnedObject);
+                spawnedObject.gameObject.SetActive(false);
+                spawnedObject.transform.SetParent(poolParent.transform);
+                poolStack.Push(spawnedObject);
             }
         }
 
-        public T GetFromPool()
+        public T GetFromPool(Vector3 position, Quaternion rotation)
         {
             if (poolStack.Count > 0)
             {
                 T obj = poolStack.Pop();
                 obj.transform.SetParent(null);
                 obj.gameObject.SetActive(true);
-                obj.PrepareForSpawn();
+                obj.transform.SetPositionAndRotation(position, rotation);
+                obj.PrepareForSpawn(position, rotation);
                 return obj;
             }
 
             Debug.LogError("Pool is empty. New object has been created. Consider extending the pool size");
             
             T newObj = GamePersistent.GetActiveWorld().SpawnObject(originalPrefab);
-            newObj.gameObject.SetActive(true);
-            newObj.PrepareForSpawn();
+            newObj.transform.SetPositionAndRotation(position, rotation);
+            newObj.PrepareForSpawn(position, rotation);
             return newObj;
         }
 

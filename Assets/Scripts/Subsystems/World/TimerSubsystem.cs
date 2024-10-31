@@ -53,7 +53,7 @@ namespace Subsystems.World
                 
                 if (currentTime >= 1f)
                 {
-                    onTimerElapsed.Invoke();
+                    onTimerElapsed?.Invoke();
                     if (looping)
                     {
                         isStarted = false;
@@ -74,7 +74,7 @@ namespace Subsystems.World
             public void InvalidateTimer(bool shouldCallOnTimerElapsed = false)
             {
                 if(shouldCallOnTimerElapsed)
-                    onTimerElapsed.Invoke();
+                    onTimerElapsed?.Invoke();
                 isTimerValid = false;
             }
 
@@ -86,6 +86,11 @@ namespace Subsystems.World
             public float GetCurrentTime()
             {
                 return currentTime;
+            }
+
+            public bool IsPaused()
+            {
+                return isPaused;
             }
         }
 
@@ -136,6 +141,8 @@ namespace Subsystems.World
             return timerId;
         }
 
+        //TODO: More validation in the methods below would be nice :)
+        
         public void InvalidateTimer(Guid timerId, bool shouldCallAction = false)
         {
             tickingTimers[timerId].InvalidateTimer(shouldCallAction);
@@ -149,6 +156,11 @@ namespace Subsystems.World
         public float GetCurrentTime(Guid timerId)
         {
             return tickingTimers[timerId].GetCurrentTime();
+        }
+
+        public bool IsTimerPaused(Guid timerId)
+        {
+            return tickingTimers[timerId].IsPaused();
         }
     }
 }
