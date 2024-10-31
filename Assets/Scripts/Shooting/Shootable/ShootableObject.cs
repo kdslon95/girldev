@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using UnityEngine.Events;
 using Utils.ObjectPooling;
 
 namespace Shooting.Shootable
@@ -30,6 +32,9 @@ namespace Shooting.Shootable
         
         //TODO: Modifiers
 
+        //TODO: Make it private?
+        public UnityAction<ShootableObject> OnHitEvent;
+
         private Rigidbody rb;
         protected virtual void PrepareShootableObject()
         {
@@ -52,7 +57,13 @@ namespace Shooting.Shootable
 
         public virtual void PrepareForDespawn()
         {
+            OnHitEvent = null;
             rb.velocity = Vector3.zero;
+        }
+
+        public void OnCollisionEnter(Collision other)
+        {
+            OnHitEvent?.Invoke(this);
         }
     }
 }

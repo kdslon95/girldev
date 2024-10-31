@@ -70,9 +70,15 @@ namespace Shooting
             
             if (inputSubsystem.InputContext.isFireDown && timerSubsystem.IsTimerPaused(bullets[currentBullet].timerId))
             {
-                bulletFactorySubsystem.SpawnBullet(bullets[currentBullet].type, spawnSpot.position, spawnSpot.rotation);
+                ShootableObject bullet = bulletFactorySubsystem.SpawnBullet(bullets[currentBullet].type, spawnSpot.position, spawnSpot.rotation);
+                bullet.OnHitEvent += OnBulletDestroyed;
                 GamePersistent.GetActiveWorld().GetSubsystem<TimerSubsystem>().ResumeTimer(bullets[currentBullet].timerId);
             }
+        }
+
+        void OnBulletDestroyed(ShootableObject shootable)
+        {
+            bulletFactorySubsystem.DespawnBullet(shootable);
         }
     }
 }
