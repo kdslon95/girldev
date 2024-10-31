@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Shooting.Shootable
 {
-    public class HeavyBullet : ShootableObject
+    public class NormalBullet : ShootableObject
     {
         
     }

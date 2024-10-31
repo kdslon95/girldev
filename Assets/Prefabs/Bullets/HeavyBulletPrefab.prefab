@@ -120,9 +120,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shootableType: 1
-  cooldown: 0.1
+  cooldown: 0.5
   damage: 1
-  speed: 10
+  speed: 5
 --- !u!54 &1278190871940476662
 Rigidbody:
   m_ObjectHideFlags: 0

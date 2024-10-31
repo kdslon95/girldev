@@ -7,7 +7,6 @@ namespace Subsystems.Persistent
     {
         public float movementValue;
         public bool isFireDown;
-        public bool isFireHeld;
         public bool isWeapon1Down;
         public bool isWeapon2Down;
     }
@@ -26,7 +25,8 @@ namespace Subsystems.Persistent
         {
             inputContext.movementValue = Input.GetAxis("Horizontal");
             inputContext.isFireDown = Input.GetButtonDown("Fire");
-            inputContext.isFireHeld = Input.GetButton("Fire");
+            inputContext.isWeapon1Down = Input.GetButton("Weapon1");
+            inputContext.isWeapon2Down = Input.GetButton("Weapon2");
         }
     }
 }

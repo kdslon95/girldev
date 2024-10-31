@@ -59,11 +59,16 @@ namespace Shooting
         
         void Update()
         {
-            bool shootingButtonUsed = bullets[currentBullet].type == ShootableType.Heavy
-                ? inputSubsystem.InputContext.isFireDown
-                : inputSubsystem.InputContext.isFireHeld;
+            if (inputSubsystem.InputContext.isWeapon1Down)
+            {
+                currentBullet = 0;
+            }
+            else if (inputSubsystem.InputContext.isWeapon2Down)
+            {
+                currentBullet = 1;
+            }
             
-            if (shootingButtonUsed && timerSubsystem.IsTimerPaused(bullets[currentBullet].timerId))
+            if (inputSubsystem.InputContext.isFireDown && timerSubsystem.IsTimerPaused(bullets[currentBullet].timerId))
             {
                 bulletFactorySubsystem.SpawnBullet(bullets[currentBullet].type, spawnSpot.position, spawnSpot.rotation);
                 GamePersistent.GetActiveWorld().GetSubsystem<TimerSubsystem>().ResumeTimer(bullets[currentBullet].timerId);
