@@ -9,13 +9,14 @@ namespace Core
     public class World : MonoBehaviour
     {
         private Dictionary<Type, WorldSubsystem> registeredSubsystems;
-        
+
         public void PrepareWorld()
         {
             gameObject.hideFlags = HideFlags.HideInHierarchy;
             registeredSubsystems = new Dictionary<Type, WorldSubsystem>();
-            IEnumerable<Type> subsystemTypes = Assembly.GetExecutingAssembly().GetTypes().
-                Where(t => t.IsSubclassOf(typeof(WorldSubsystem)) && !t.IsAbstract);
+
+            IEnumerable<Type> subsystemTypes = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(WorldSubsystem)) && !t.IsAbstract);
 
             foreach (Type type in subsystemTypes)
             {
@@ -37,11 +38,11 @@ namespace Core
         {
             foreach (WorldSubsystem subsystem in registeredSubsystems.Values)
             {
-                subsystem.DisposeSubsystem();    
+                subsystem.DisposeSubsystem();
                 Destroy(this.gameObject);
             }
         }
-        
+
         public TSubsystem GetSubsystem<TSubsystem>() where TSubsystem : WorldSubsystem
         {
             if (registeredSubsystems.ContainsKey(typeof(TSubsystem)))
@@ -50,6 +51,28 @@ namespace Core
             }
 
             return null;
+        }
+
+        public void DespawnObject(MonoBehaviour objectToDespawn, float timeToDespawn = 0f)
+        {
+            Destroy(objectToDespawn, timeToDespawn);            
+        }
+
+        public GameObject SpawnLabelObject(string label)
+        {
+            return new GameObject(label);
+        }
+
+        public TItem SpawnObject<TItem>(TItem prefab) where TItem : MonoBehaviour
+        {
+            TItem spawnedPrefab = Instantiate(prefab);
+            return spawnedPrefab;
+        }
+        
+        public TItem SpawnObject<TItem>(TItem prefab, Vector3 position, Quaternion rotation) where TItem : MonoBehaviour
+        {
+            TItem spawnedPrefab = Instantiate(prefab, position, rotation);
+            return spawnedPrefab;
         }
     }
 }

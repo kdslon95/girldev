@@ -50,6 +50,7 @@ namespace Subsystems.World
                 }
                 
                 currentTime = (Time.time - startTimer) / duration;
+                
                 if (currentTime >= 1f)
                 {
                     onTimerElapsed.Invoke();
@@ -90,6 +91,7 @@ namespace Subsystems.World
 
         private Dictionary<Guid, Timer> tickingTimers;
         private List<Guid> invalidGuids;
+        
         public override void InitializeSubsystem()
         {
             tickingTimers = new Dictionary<Guid, Timer>();
@@ -120,6 +122,7 @@ namespace Subsystems.World
             {
                 InvalidateTimer(timer);
             }
+            
             tickingTimers.Clear();
             invalidGuids.Clear();
         }

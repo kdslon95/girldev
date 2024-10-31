@@ -1,9 +1,10 @@
 using UnityEngine;
+using Utils;
 
 namespace Shooting.Shootable
 {
     [RequireComponent(typeof(Rigidbody))]
-    public abstract class ShootableObject : MonoBehaviour
+    public abstract class ShootableObject : MonoBehaviour, IPoolableObject
     {
         public enum ShootingFrequency
         {
@@ -11,6 +12,10 @@ namespace Shooting.Shootable
             Multiple
         }
 
+        [SerializeField] 
+        private ShootableTag shootableTag;
+        public ShootableTag ShootableTag => shootableTag;
+        
         [SerializeField]
         private ShootingFrequency shootingFreq;
         public ShootingFrequency ShootingFreq => shootingFreq;
@@ -38,6 +43,20 @@ namespace Shooting.Shootable
         public virtual void StartMovement(Vector3 direction)
         {
             rb.AddForce(direction * speed, ForceMode.Impulse);
+        }
+
+        public virtual void PrepareForSpawn()
+        {
+            if(rb == null)
+                PrepareShootableObject();
+
+            StartMovement(Vector3.forward);
+        }
+
+        public virtual void PrepareForDespawn()
+        {
+            if(rb != null)
+                rb.velocity = Vector3.zero;
         }
     }
 }

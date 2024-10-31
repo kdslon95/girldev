@@ -119,6 +119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8355c5dee0517754e84066836fb11d35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shootableTag: 1
   shootingFreq: 1
   cooldown: 0.1
   damage: 1

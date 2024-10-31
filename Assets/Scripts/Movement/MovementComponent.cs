@@ -26,7 +26,10 @@ namespace Movement
         [SerializeField] 
         private float blockDetectionDistance = 1f;
 
+        #if UNITY_EDITOR
         private Color debugLineColor = Color.green;
+        #endif
+        
         private MovementDirection movementDirection = MovementDirection.Idle;
         
         void Update()
@@ -42,12 +45,17 @@ namespace Movement
 
             if (horizontalInput == 0) 
                 return;
-            
+        
+            #if UNITY_EDITOR
             debugLineColor = Color.green;
+            #endif
+            
             movementDirection = (MovementDirection) Mathf.Sign(horizontalInput);
             if (Physics.Raycast(transform.position, Vector3.right * horizontalInput, blockDetectionDistance, LayerMask.GetMask("Blocker")))
             {
+                #if UNITY_EDITOR
                 debugLineColor = Color.red;
+                #endif
                 return;
             }
                 

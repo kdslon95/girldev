@@ -11,14 +11,13 @@ namespace Core
     {
         private static Dictionary<Type, PersistentSubsystem> registeredSubsystems;
         private static World world;
-        private static Scene activeScene;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void OnAppStarted()
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
-            SceneManager.sceneUnloaded += OnSceneUnloaded;
             SceneManager.activeSceneChanged += OnActiveSceneChanged;
+            
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
             
             IEnumerable<Type> subsystemTypes = Assembly.GetExecutingAssembly().GetTypes().
@@ -26,7 +25,7 @@ namespace Core
 
             foreach (Type type in subsystemTypes)
             {
-                PersistentSubsystem subsystem = (PersistentSubsystem)Activator.CreateInstance(type);
+                PersistentSubsystem subsystem = (PersistentSubsystem) Activator.CreateInstance(type);
                 subsystem.InitializeSubsystem();
                 registeredSubsystems.Add(type, subsystem);
             }
@@ -37,27 +36,18 @@ namespace Core
             if (mode != LoadSceneMode.Single) 
                 return;
             
-            activeScene = scene;
             SpawnNewWorld();
-        }
-
-        private static void OnSceneUnloaded(Scene scene)
-        {
-            if (scene == activeScene)
-            {
-                activeScene = SceneManager.GetActiveScene();
-                SpawnNewWorld();
-            }
         }
 
         private static void OnActiveSceneChanged(Scene oldScene, Scene newScene)
         {
-            activeScene = newScene;
             SpawnNewWorld();
         }
         
         private static void OnProcessExit(object sender, EventArgs e)
         {
+            world.InvalidateWorld();
+            
             foreach (PersistentSubsystem subsystem in registeredSubsystems.Values)
             {
                 subsystem.DisposeSubsystem();    

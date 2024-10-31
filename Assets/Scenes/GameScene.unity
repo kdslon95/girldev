@@ -20250,8 +20250,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d18410e4b6664ff46abd63336093deab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  availableBullets:
-  - {fileID: 7402869144176431192, guid: b12e4651f902dcd439c5031938645933, type: 3}
+  availableBullets: 01000000
 --- !u!23 &6999710846432512981
 MeshRenderer:
   m_ObjectHideFlags: 0
